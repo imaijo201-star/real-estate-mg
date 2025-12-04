@@ -1,11 +1,18 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 export async function createProperty(formData: FormData) {
     try {
+        // 인증된 사용자 확인
+        const session = await auth();
+        if (!session?.user?.id) {
+            throw new Error('인증되지 않은 사용자입니다.');
+        }
+
         const propertyType = formData.get('propertyType') as string;
 
         // Property 생성 + 유형별 정보 동시 생성 (Transaction)
@@ -43,7 +50,7 @@ export async function createProperty(formData: FormData) {
                     confirmDate: formData.get('confirmDate')
                         ? new Date(formData.get('confirmDate') as string)
                         : null,
-                    userId: 'temp-user',
+                    userId: session.user.id,
                     status: 'AVAILABLE',
                 },
             });

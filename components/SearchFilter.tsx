@@ -11,7 +11,7 @@ export function SearchFilter() {
     // Debounce 처리
     useEffect(() => {
         const timer = setTimeout(() => {
-            const params = new URLSearchParams(searchParams);
+            const params = new URLSearchParams(searchParams.toString());
             if (term) {
                 params.set('q', term);
             } else {
@@ -35,7 +35,7 @@ export function SearchFilter() {
             <select
                 className="border rounded px-4 py-2"
                 onChange={(e) => {
-                    const params = new URLSearchParams(searchParams);
+                    const params = new URLSearchParams(searchParams.toString());
                     if (e.target.value) params.set('type', e.target.value);
                     else params.delete('type');
                     router.replace(`?${params.toString()}`);
