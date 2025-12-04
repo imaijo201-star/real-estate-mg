@@ -1,6 +1,10 @@
 {
-  "/page": "app/page.js",
+  "/_not-found": "app/_not-found.js",
   "/login/page": "app/login/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/admin/properties/page": "app/admin/properties/page.js"
+  "/page": "app/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/(admin)/properties/[id]/page": "app/(admin)/properties/[id]/page.js",
+  "/(admin)/properties/page": "app/(admin)/properties/page.js",
+  "/(admin)/page": "app/(admin)/page.js",
+  "/(admin)/properties/new/page": "app/(admin)/properties/new/page.js"
 }
