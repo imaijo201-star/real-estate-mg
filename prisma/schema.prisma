@@ -1,0 +1,191 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Property {
+  id                Int      @id @default(autoincrement())
+  
+  // 기본 정보
+  title             String   // 매물명
+  tradeType         String   @default("SALE") // SALE(매매), JEONSE(전세), MONTHLY(월세)
+  salePrice         Float?   // 매매가 (만원)
+  deposit           Float?   // 보증금 (만원)
+  monthlyRent       Float?   // 월세 (만원)
+  
+  // 주소 및 위치
+  address           String
+  addressDetail     String?
+  latitude          Float?
+  longitude         Float?
+  
+  // 면적
+  exclusiveArea     Float    // 전용면적 (m²)
+  supplyArea        Float?   // 공급면적 (m²)
+  
+  // 건물 정보
+  propertyType      String   // APARTMENT, OFFICETEL, VILLA, HOUSE, ONE_ROOM, TWO_ROOM, COMMERCIAL, OFFICE, FACTORY, LAND
+  floor             Int?     // 해당 층수
+  totalFloors       Int?     // 전체 층수
+  rooms             Int      @default(1)     // 방 개수
+  bathrooms         Int      @default(1)     // 욕실 개수
+  direction         String?  // 향 (SOUTH, EAST, WEST, NORTH, SOUTHEAST...)
+  buildYear         Int?     // 준공년도
+  
+  // 옵션
+  hasElevator       Boolean  @default(false)
+  parkingSpaces     Int      @default(0)
+  heatingType       String?  // INDIVIDUAL, CENTRAL, DISTRICT
+  availableFrom     DateTime?
+  
+  // 관리비
+  maintenanceFee    Float?   // 관리비 (만원)
+  maintenanceIncludes String? // 포함 항목
+  
+  // 설명
+  summary           String?  // 한줄 소개
+  description       String?  // 상세 설명
+  
+  // 승인 정보
+  approvalNo        String?
+  confirmDate       DateTime?
+  
+  // 상태
+  status            String   @default("AVAILABLE") // AVAILABLE, RESERVED, SOLD
+  
+  // 관계
+  images            Image[]
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  agentInfo         AgentInfo?
+  
+  // 유형별 전용 정보 (Optional Relations)
+  commercialInfo    CommercialInfo?
+  landInfo          LandInfo?
+  officeInfo        OfficeInfo?
+  factoryInfo       FactoryInfo?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([propertyType, status, tradeType])
+  @@index([address])
+  @@index([userId])
+}
+
+model Image {
+  id          Int      @id @default(autoincrement())
+  url         String
+  order       Int      @default(0) // 이미지 순서
+  isMain      Boolean  @default(false) // 대표 이미지
+  propertyId  Int
+  property    Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  
+  @@index([propertyId])
+}
+
+model AgentInfo {
+  id              Int      @id @default(autoincrement())
+  officeName      String   // 중개사무소명
+  phone           String
+  registrationNo  String?  // 중개사 등록번호
+  propertyId      Int      @unique
+  property        Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime @default(now())
+}
+
+// 상가 전용 정보
+model CommercialInfo {
+  id                    Int      @id @default(autoincrement())
+  propertyId            Int      @unique
+  property              Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  premiumFee            Float?   // 권리금 (만원)
+  businessRestrictions  String?  // 업종 제한
+  recommendedBusinesses String?  // 추천 업종
+  monthlyRevenue        Float?   // 월 평균 매출 (만원)
+  isOperating           Boolean  @default(false) // 영업 중
+  isTransfer            Boolean  @default(false) // 양도
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// 토지 전용 정보
+model LandInfo {
+  id                      Int      @id @default(autoincrement())
+  propertyId              Int      @unique
+  property                Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  landCategory            String?  // 지목 (대지, 전, 답, 임야 등)
+  zoning                  String?  // 용도지역
+  roadFacing              String?  // 도로 접면 (2면, 3면, 맹지)
+  topography              String?  // 지형 (평지, 경사지)
+  buildingCoverageRatio   Float?   // 건폐율 (%)
+  floorAreaRatio          Float?   // 용적률 (%)
+  
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+// 사무실 전용 정보
+model OfficeInfo {
+  id              Int      @id @default(autoincrement())
+  propertyId      Int      @unique
+  property        Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  meetingRooms    Int      @default(0) // 회의실 수
+  deskCapacity    Int?     // 책상 수용 인원
+  internetSpeed   String?  // 인터넷 속도 (예: 1Gbps)
+  hasSecurity     Boolean  @default(false) // 보안 시설
+  is24HourAccess  Boolean  @default(false) // 24시간 출입
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// 공장 전용 정보
+model FactoryInfo {
+  id                        Int      @id @default(autoincrement())
+  propertyId                Int      @unique
+  property                  Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  
+  ceilingHeight             Float?   // 천장 높이 (m)
+  electricCapacity          Float?   // 전기 용량 (kW)
+  waterCapacity             Float?   // 용수 용량 (톤/일)
+  hasCargoElevator          Boolean  @default(false)
+  hasCrane                  Boolean  @default(false)
+  hasEnvironmentalPermit    Boolean  @default(false)
+  
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+}
+
+enum UserRole {
+  ADMIN
+  SENIOR_MANAGER
+  MANAGER
+}
+
+model User {
+  id         String     @id @default(cuid())
+  username   String     @unique      // 로그인 아이디
+  email      String     @unique
+  name       String                  // 관리자 이름
+  phone      String                  // 휴대폰번호
+  password   String                  // bcrypt 해시
+  role       UserRole   @default(MANAGER) // Enum으로 변경 (PostgreSQL 지원)
+  
+  properties Property[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
