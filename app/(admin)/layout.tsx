@@ -1,5 +1,6 @@
 import { Header } from '@/components/layout/Header';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { Footer } from '@/components/layout/Footer';
 import { auth } from '@/auth';
 import { ReactNode } from 'react';
 
@@ -7,14 +8,17 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     const session = await auth();
 
     return (
-        <div className="app-wrap">
-            <Header session={session} />
+        <div className="wrapper">
             <Sidebar />
-            <main className="app-content">
-                <div className="container-fluid p-4">
-                    {children}
+            <div className="content-page">
+                <Header session={session} />
+                <div className="content">
+                    <div className="container-fluid">
+                        {children}
+                    </div>
                 </div>
-            </main>
+                <Footer />
+            </div>
         </div>
     );
 }

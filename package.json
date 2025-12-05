@@ -25,8 +25,6 @@
     "react-apexcharts": "^1.9.0",
     "react-dom": "^18",
     "recharts": "^2.12.2",
-    "tailwind-merge": "^2.2.1",
-    "tailwindcss-animate": "^1.0.7",
     "xlsx": "^0.18.5",
     "zustand": "^4.5.2"
   },
@@ -35,12 +33,9 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
-    "postcss": "^8",
     "prisma": "^5.10.2",
-    "tailwindcss": "^3.3.0",
     "typescript": "^5"
   }
 }

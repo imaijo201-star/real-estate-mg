@@ -16,18 +16,19 @@ export default function RootLayout({
     children: React.ReactNode;
 }) {
     return (
-        <html lang="ko" suppressHydrationWarning>
+        <html lang="ko" data-bs-theme="light" className="set-nav-dark" data-sidenav-color="dark" suppressHydrationWarning>
             <head>
-                {/* SmartAdmin CSS */}
-                <link rel="stylesheet" href="/plugins/waves/waves.min.css" />
-                <link rel="stylesheet" href="/css/smartapp.min.css" />
-                <link rel="stylesheet" href="/webfonts/smartadmin/sa-icons.css" />
-                <link rel="stylesheet" href="/webfonts/fontawesome/fontawesome.css" />
+                {/* Inspinia CSS */}
+                <link rel="stylesheet" href="/inspinia/css/vendors.min.css" />
+                <link rel="stylesheet" href="/inspinia/css/app.min.css" />
             </head>
-            <body className={inter.className} suppressHydrationWarning>
+            <body>
                 <ThemeProvider>
                     {children}
                 </ThemeProvider>
+                <script src="/inspinia/js/vendors.min.js"></script>
+                <script src="/inspinia/js/config.js"></script>
+                <script src="/inspinia/js/app.js"></script>
             </body>
         </html>
     );

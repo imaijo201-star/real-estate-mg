@@ -1,81 +1,123 @@
 'use client';
 
-import Link from 'next/link';
-import { useTheme } from 'next-themes';
-import { Icon } from '../ui/Icon';
-import { ProfileDropdown } from '../ProfileDropdown';
+import { Session } from 'next-auth';
+import { signOut } from 'next-auth/react';
+import { useEffect, useRef } from 'react';
 
-interface HeaderProps {
-    session: any;
-}
+export function Header({ session }: { session: Session | null }) {
+    const notificationScrollRef = useRef<HTMLDivElement>(null);
 
-export function Header({ session }: HeaderProps) {
-    const { theme, setTheme } = useTheme();
+    useEffect(() => {
+        // Add data-simplebar attribute on client side only to avoid hydration error
+        if (notificationScrollRef.current) {
+            notificationScrollRef.current.setAttribute('data-simplebar', '');
+        }
+    }, []);
+
+    const handleToggleSidebar = () => {
+        document.body.classList.toggle('sidenav-toggled');
+    };
 
     return (
-        <header className="app-header">
-            <div className="d-flex flex-grow-1 w-100 me-auto align-items-center">
-                {/* Logo */}
-                <Link href="/" className="app-logo flex-shrink-0">
-                    <svg className="custom-logo">
-                        <use href="/img/app-logo.svg#custom-logo" />
-                    </svg>
-                </Link>
+        <header className="app-topbar m-0">
+            <div className="container-fluid topbar-menu d-flex justify-content-between">
+                <div className="d-flex align-items-center gap-2">
+                    {/* Sidebar Toggle Button */}
+                    <button className="sidenav-toggle-button btn btn-primary btn-icon" onClick={handleToggleSidebar}>
+                        <i className="ti ti-menu-4 fs-22"></i>
+                    </button>
 
-                {/* Mobile Menu Icon */}
-                <button
-                    className="mobile-menu-icon me-2 d-flex d-sm-flex d-md-flex d-lg-none flex-shrink-0"
-                    data-action="toggle-swap"
-                    data-toggleclass="app-mobile-menu-open"
-                >
-                    <Icon name="menu" />
-                </button>
+                    {/* Search */}
+                    <div className="app-search d-none d-xl-flex">
+                        <input type="search" className="form-control topbar-search" name="search" placeholder="Search for something..." />
+                        <i className="ti ti-search app-search-icon text-muted"></i>
+                    </div>
+                </div>
 
-                {/* Collapse Icon */}
-                <button
-                    type="button"
-                    className="collapse-icon me-3 d-none d-lg-inline-flex d-xl-inline-flex d-xxl-inline-flex"
-                    data-action="toggle"
-                    data-class="set-nav-minified"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5 8">
-                        <polygon fill="#878787" points="4.5,1 3.8,0.2 0,4 3.8,7.8 4.5,7 1.5,4" />
-                    </svg>
-                </button>
+                <div className="d-flex align-items-center gap-2">
+                    {/* Notifications */}
+                    <div className="topbar-item">
+                        <div className="dropdown">
+                            <button className="topbar-link dropdown-toggle drop-arrow-none" data-bs-toggle="dropdown" data-bs-offset="0,22" type="button" data-bs-auto-close="outside" aria-haspopup="false" aria-expanded="false">
+                                <i className="ti ti-bell fs-22"></i>
+                                <span className="badge text-bg-danger badge-circle topbar-badge">3</span>
+                            </button>
 
-                {/* Search */}
-                <form className="app-search" role="search" autoComplete="off">
-                    <input type="text" className="form-control" placeholder="Search for anything" />
-                </form>
+                            <div className="dropdown-menu p-0 dropdown-menu-end dropdown-menu-lg">
+                                <div className="px-3 py-2 border-bottom">
+                                    <div className="row align-items-center">
+                                        <div className="col">
+                                            <h6 className="m-0 fs-md fw-semibold">알림</h6>
+                                        </div>
+                                        <div className="col-auto">
+                                            <span className="badge text-bg-light fs-13">3개</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ref={notificationScrollRef} style={{ maxHeight: '230px' }}>
+                                    <div className="text-center p-4">
+                                        <p className="text-muted mb-0">새로운 알림이 없습니다</p>
+                                    </div>
+                                </div>
+
+                                <a href="javascript:void(0);" className="dropdown-item text-center text-reset text-decoration-underline link-offset-2 fw-bold notify-item border-top border-light py-2">
+                                    모든 알림 보기
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Light/Dark Mode Button */}
+                    <div className="topbar-item d-none d-sm-flex">
+                        <button className="topbar-link" id="light-dark-mode" type="button">
+                            <i className="ti ti-moon fs-22 mode-light-moon"></i>
+                            <i className="ti ti-sun fs-22 mode-light-sun"></i>
+                        </button>
+                    </div>
+
+                    {/* User Dropdown */}
+                    {session?.user && (
+                        <div className="topbar-item nav-user">
+                            <div className="dropdown">
+                                <a className="topbar-link dropdown-toggle drop-arrow-none px-2" data-bs-toggle="dropdown" data-bs-offset="0,16" href="#!" aria-haspopup="false" aria-expanded="false">
+                                    <img src="/inspinia/images/users/user-2.jpg" width="32" className="rounded-circle me-lg-2 d-flex" alt="user-image" />
+                                    <div className="d-lg-flex align-items-center gap-1 d-none">
+                                        <h5 className="my-0">{session.user.name || '사용자'}</h5>
+                                        <i className="ti ti-chevron-down align-middle"></i>
+                                    </div>
+                                </a>
+                                <div className="dropdown-menu dropdown-menu-end">
+                                    {/* Header */}
+                                    <div className="dropdown-header noti-title">
+                                        <h6 className="text-overflow m-0">환영합니다!</h6>
+                                    </div>
+
+                                    {/* Profile */}
+                                    <a href="#" className="dropdown-item">
+                                        <i className="ti ti-user-circle me-2 fs-17 align-middle"></i>
+                                        <span className="align-middle">프로필</span>
+                                    </a>
+
+                                    {/* Settings */}
+                                    <a href="#" className="dropdown-item">
+                                        <i className="ti ti-settings-2 me-2 fs-17 align-middle"></i>
+                                        <span className="align-middle">설정</span>
+                                    </a>
+
+                                    <div className="dropdown-divider"></div>
+
+                                    {/* Logout */}
+                                    <a href="javascript:void(0);" className="dropdown-item text-danger fw-semibold" onClick={() => signOut({ redirect: true, redirectTo: '/login' })}>
+                                        <i className="ti ti-logout-2 me-2 fs-17 align-middle"></i>
+                                        <span className="align-middle">로그아웃</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
-
-            {/* Settings */}
-            <button type="button" className="btn btn-system hidden-mobile" data-action="toggle-swap" data-toggleclass="open" data-target="aside.js-drawer-settings">
-                <Icon name="settings" size="2x" />
-            </button>
-
-            {/* Theme Toggle */}
-            <button
-                type="button"
-                className="btn btn-system"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            >
-                <Icon name={theme === 'dark' ? 'moon' : 'sun'} size="2x" />
-            </button>
-
-            {/* Fullscreen */}
-            <button type="button" className="btn btn-system d-none d-sm-block d-sm-none d-md-none d-lg-block" onClick={() => document.documentElement.requestFullscreen()}>
-                <Icon name="maximize" size="2x" />
-            </button>
-
-            {/* Notifications */}
-            <button type="button" className="btn btn-system dropdown-toggle no-arrow" data-bs-toggle="dropdown">
-                <span className="badge badge-icon pos-top pos-end">5</span>
-                <Icon name="bell" size="2x" />
-            </button>
-
-            {/* Profile Dropdown */}
-            <ProfileDropdown session={session} />
         </header>
     );
 }
